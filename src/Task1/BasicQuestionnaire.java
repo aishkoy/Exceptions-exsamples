@@ -10,8 +10,6 @@ import Task1.interfaces.ValidateData;
 import java.util.Scanner;
 
 public class BasicQuestionnaire implements Questionnaire, ValidateData {
-    private String name;
-    private String surname;
     private int yearOfBirth;
     private int yearOfWork;
     private static final int CURRENT_YEAR = 2024;
@@ -23,8 +21,8 @@ public class BasicQuestionnaire implements Questionnaire, ValidateData {
         while (true) {
             try {
                 print("Введите ваше имя: ");
-                this.name = sc.nextLine().strip();
-                validateName(this.name);
+                String name = sc.nextLine().strip();
+                validateName(name);
                 return name;
             } catch (StringContainsNumberException e) {
                 System.out.println(e.getMessage());
@@ -37,8 +35,8 @@ public class BasicQuestionnaire implements Questionnaire, ValidateData {
         while (true) {
             try {
                 print("Введите вашу фамилию: ");
-                this.surname = sc.nextLine().strip();
-                validateName(this.surname);
+                String surname = sc.nextLine().strip();
+                validateName(surname);
                 return surname;
             } catch (StringContainsNumberException e) {
                 System.out.println(e.getMessage());

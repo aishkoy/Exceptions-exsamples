@@ -1,8 +1,7 @@
 package Task2;
 
-import java.text.NumberFormat;
+
 import java.text.ParseException;
-import java.util.OptionalDouble;
 import java.util.Scanner;
 
 public class InputHandler {
@@ -12,7 +11,7 @@ public class InputHandler {
         try {
             String figureName = getFigureName();
             return getFigure(figureName);
-        } catch (InvalidFigureNameException | ParseException e) {
+        } catch (InvalidFigureNameException | ParseException | IllegalArgumentException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
             return askFigure();
@@ -20,11 +19,12 @@ public class InputHandler {
     }
 
     private String getFigureName() {
-        System.out.println("Введите номер фигуры \n" +
-                "1. - параллелепипед\n" +
-                "2. - сфера\n" +
-                "3. - цилиндр\n" +
-                "4. - конус):  ");
+        System.out.println("""
+                Введите номер фигуры\s
+                1. - параллелепипед
+                2. - сфера
+                3. - цилиндр
+                4. - конус): \s""");
 
         String figureNum = sc.nextLine().strip();
 
@@ -51,11 +51,11 @@ public class InputHandler {
         }
     }
 
-    private double validateParameters(OptionalDouble parameter) {
-        if (parameter.getAsDouble() <= 0) {
-            throw new NegativeValueException("Параметры фигуры могут быть только больше нуля!!");
+    private double validateParameters(double parameter) {
+        if (parameter <= 0) {
+            throw new IllegalArgumentException("Параметры фигуры могут быть только больше нуля!!");
         }
-        return parameter.getAsDouble();
+        return parameter;
     }
 
     private Figure getParallelepiped() throws ParseException {
@@ -85,22 +85,20 @@ public class InputHandler {
     private double getParameter(String prompt) throws ParseException {
         try{
             System.out.print(prompt);
-            OptionalDouble value = tryParse(sc.nextLine().strip());
+            double value = tryParse(sc.nextLine().strip());
             return validateParameters(value);
-        } catch (NegativeValueException | IllegalArgumentException | ParseException e) {
+        } catch ( IllegalArgumentException | ParseException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
             return getParameter(prompt);
         }
     }
 
-    private static OptionalDouble tryParse(String s) throws ParseException {
+    private static double tryParse(String s) throws ParseException {
         try {
-            NumberFormat nf = NumberFormat.getInstance();
-            double value = nf.parse(s).doubleValue();
-            return OptionalDouble.of(value);
-        } catch (ParseException e) {
-            throw new ParseException("Невозможно преобразовать " + s + "в число", e.getErrorOffset());
+            return Double.parseDouble(s);
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Невозможно преобразовать " + s + "в число");
         }
     }
 }
