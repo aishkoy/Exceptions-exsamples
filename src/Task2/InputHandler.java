@@ -7,95 +7,91 @@ import java.util.Scanner;
 
 public class InputHandler {
     private final static Scanner sc = new Scanner(System.in);
-    private final static String[] VALID_FIGURES = {"параллелепипед", "сфера", "цилиндр", "конус"};
-
 
     public Figure askFigure() {
         try {
             String figureName = getFigureName();
             return getFigure(figureName);
-        } catch (ParseException e) {
-            System.out.println("Ошибка при парсинге числа: " + e.getMessage());
+        } catch (InvalidFigureNameException | ParseException e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
-            return null;
+            return askFigure();
         }
     }
 
     private String getFigureName() {
-        System.out.println("Введите название фигуры (параллелепипед/сфера/цилиндр/конус):  ");
-        String figureName = sc.nextLine().strip().toLowerCase();
+        System.out.println("Введите номер фигуры \n" +
+                "1. - параллелепипед\n" +
+                "2. - сфера\n" +
+                "3. - цилиндр\n" +
+                "4. - конус):  ");
 
-        for (String figure : VALID_FIGURES) {
-            if (figure.equals(figureName)) {
-                return figureName;
-            }
+        String figureNum = sc.nextLine().strip();
+
+        if(figureNum.isBlank() || !figureNum.matches("[1-4]")) {
+            throw new InvalidFigureNameException("Неверный номер фигуры!");
         }
-
-        throw new InvalidFigureNameException("Неверное название фигуры: " + figureName);
+        return figureNum;
     }
 
     private Figure getFigure(String figureName) throws ParseException {
-        if (figureName == null) {
-            return null;
-        }
-
         System.out.println("Введите параметры: ");
 
         switch (figureName) {
-            case "параллелепипед":
-                OptionalDouble[] params = getParametersForParallelepiped();
-                validateParameters(params);
-                return new Parallelepiped(params[0].getAsDouble(), params[1].getAsDouble(), params[2].getAsDouble());
-            case "сфера":
-                OptionalDouble radius = getParametersForSphere();
-                validateParameters(new OptionalDouble[]{radius});
-                return new Sphere(radius.getAsDouble());
-            case "цилиндр":
-                OptionalDouble[] cylinderParams = getParametersForCylinderOrCone();
-                validateParameters(cylinderParams);
-                return new Cylinder(cylinderParams[0].getAsDouble(), cylinderParams[1].getAsDouble());
-            case "конус":
-                OptionalDouble[] coneParameters = getParametersForCylinderOrCone();
-                validateParameters(coneParameters);
-                return new Cone(coneParameters[0].getAsDouble(), coneParameters[1].getAsDouble());
-
+            case "1":
+                return getParallelepiped();
+            case "2":
+                return getSphere();
+            case "3":
+                return getCylinder();
+            case "4":
+                return getCone();
             default:
-                throw new InvalidFigureNameException("Неверное название фигуры: " + figureName);
+                throw new InvalidFigureNameException("Неверный номер фигуры!!");
         }
     }
 
-    private void validateParameters(OptionalDouble[] parameters) {
-        for (OptionalDouble parameter : parameters) {
-            if (parameter.isEmpty()) {
-                throw new IllegalArgumentException("Введено некорректное число!!");
-            }
-            if (parameter.getAsDouble() <= 0) {
-                throw new IllegalArgumentException("Параметры фигуры могут быть только положительными!!");
-            }
+    private double validateParameters(OptionalDouble parameter) {
+        if (parameter.getAsDouble() <= 0) {
+            throw new NegativeValueException("Параметры фигуры могут быть только больше нуля!!");
         }
+        return parameter.getAsDouble();
     }
 
-    private OptionalDouble[] getParametersForParallelepiped() throws ParseException {
-        System.out.print("Введите высоту: ");
-        OptionalDouble height = tryParse(sc.nextLine().strip());
-        System.out.print("Введите длину: ");
-        OptionalDouble a = tryParse(sc.nextLine().strip());
-        System.out.print("Введите ширину: ");
-        OptionalDouble b = tryParse(sc.nextLine().strip());
-        return new OptionalDouble[]{height, a, b};
+    private Figure getParallelepiped() throws ParseException {
+        double height = getParameter("Введите высоту: ");
+        double width = getParameter("Введите ширину: ");
+        double length = getParameter("Введите длину: ");
+        return new Parallelepiped(height, width, length);
     }
 
-    private OptionalDouble[] getParametersForCylinderOrCone() throws ParseException {
-        System.out.print("Введите радиус: ");
-        OptionalDouble radius = tryParse(sc.nextLine().strip());
-        System.out.print("Введите высоту: ");
-        OptionalDouble height = tryParse(sc.nextLine().strip());
-        return new OptionalDouble[]{radius, height};
+    private Figure getSphere() throws ParseException{
+        double radius = getParameter("Введите радиус: ");
+        return new Sphere(radius);
     }
 
-    private OptionalDouble getParametersForSphere() throws ParseException {
-        System.out.print("Введите радиус: ");
-        return tryParse(sc.nextLine().strip());
+    private Figure getCylinder() throws ParseException {
+        double radius = getParameter("Введите радиус: ");
+        double height = getParameter("Введите высоту: ");
+        return new Cylinder(radius, height);
+    }
+
+    private Figure getCone() throws ParseException {
+        double radius = getParameter("Введите радиус: ");
+        double height = getParameter("Введите высоту: ");
+        return new Cone(radius, height);
+    }
+
+    private double getParameter(String prompt) throws ParseException {
+        try{
+            System.out.print(prompt);
+            OptionalDouble value = tryParse(sc.nextLine().strip());
+            return validateParameters(value);
+        } catch (NegativeValueException | IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            return getParameter(prompt);
+        }
     }
 
     private static OptionalDouble tryParse(String s) throws ParseException {

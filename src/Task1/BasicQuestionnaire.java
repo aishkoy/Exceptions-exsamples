@@ -90,9 +90,9 @@ public class BasicQuestionnaire implements Questionnaire, ValidateData {
         if (value.isEmpty()) {
             throw new StringContainsNumberException("Поле не может быть пустым!");
         }
-        if (!value.matches("[а-яА-Яa-zA-Z-]+")) {
+        if (!value.matches("[а-яА-Яa-zA-Z]+")) {
             throw new StringContainsNumberException(
-                    "Допустимы только буквы и дефис!"
+                    "Допустимы только буквы!"
             );
         }
     }
@@ -103,6 +103,9 @@ public class BasicQuestionnaire implements Questionnaire, ValidateData {
             int yearOfBirth = Integer.parseInt(year);
             if(yearOfBirth > CURRENT_YEAR){
                 throw new InvalidYearException(String.format("Ошибка: %s не может быть из будущего!", fieldName));
+            }
+            if(yearOfBirth < 0){
+                throw new InvalidYearException(String.format("Ошибка: %s не может быть отрицательным!", fieldName));
             }
             return yearOfBirth;
         } catch(NumberFormatException e){
