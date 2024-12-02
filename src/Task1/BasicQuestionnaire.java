@@ -1,5 +1,6 @@
 package Task1;
 
+import Task1.exceptions.InvalidAgeException;
 import Task1.exceptions.InvalidWorkAgeException;
 import Task1.exceptions.InvalidYearException;
 import Task1.exceptions.StringContainsNumberException;
@@ -18,7 +19,7 @@ public class BasicQuestionnaire implements Questionnaire, ValidateData {
     private static final Scanner sc = new Scanner(System.in);
 
     @Override
-    public String askName(){
+    public String askName() {
         while (true) {
             try {
                 print("Введите ваше имя: ");
@@ -33,8 +34,8 @@ public class BasicQuestionnaire implements Questionnaire, ValidateData {
 
     @Override
     public String askSurname() {
-        while(true){
-            try{
+        while (true) {
+            try {
                 print("Введите вашу фамилию: ");
                 this.surname = sc.nextLine().strip();
                 validateName(this.surname);
@@ -47,36 +48,36 @@ public class BasicQuestionnaire implements Questionnaire, ValidateData {
 
     @Override
     public int askYearOfBirth() {
-        while (true) {
-            try{
-                print("Введите ваш год рождения: ");
-                String input = sc.nextLine().strip();
-                this.yearOfBirth = parseAndValidYear(input, "Год рождения");
-                return yearOfBirth;
-            } catch (NumberFormatException | InvalidYearException e) {
-                System.out.println(e.getMessage());
-            }
+
+        try {
+            print("Введите ваш год рождения: ");
+            String input = sc.nextLine().strip();
+            this.yearOfBirth = parseAndValidYear(input, "год рождения");
+            return yearOfBirth;
+        } catch (NumberFormatException | InvalidYearException | InvalidAgeException e) {
+            System.out.println(e.getMessage());
+            return askYearOfBirth();
         }
+
     }
 
     @Override
-    public int askYearOfWork(){
-        while(true){
-            try{
-                print("Введите год начала работы: ");
-                String input = sc.nextLine().strip();
-                this.yearOfWork = parseAndValidYear(input, "Год начала работы");
-                return yearOfWork;
-            } catch(NumberFormatException | InvalidYearException e) {
-                System.out.println(e.getMessage());
-            }
+    public int askYearOfWork() {
+        try {
+            print("Введите год начала работы: ");
+            String input = sc.nextLine().strip();
+            this.yearOfWork = parseAndValidYear(input, "год начала работы");
+            return yearOfWork;
+        } catch (NumberFormatException | InvalidYearException | InvalidAgeException e) {
+            System.out.println(e.getMessage());
+            return askYearOfWork();
         }
     }
 
     @Override
     public boolean isYearOfWorkValid() {
-        try{
-            if(this.yearOfWork - this.yearOfBirth < 18){
+        try {
+            if (this.yearOfWork - this.yearOfBirth < 18) {
                 throw new InvalidWorkAgeException("Вы не могли устроиться на работу раньше 18и лет!!");
             }
             return true;
@@ -99,22 +100,25 @@ public class BasicQuestionnaire implements Questionnaire, ValidateData {
 
     @Override
     public int parseAndValidYear(String year, String fieldName) {
-        try{
+        try {
             int yearOfBirth = Integer.parseInt(year);
-            if(yearOfBirth > CURRENT_YEAR){
+            if (yearOfBirth > CURRENT_YEAR) {
                 throw new InvalidYearException(String.format("Ошибка: %s не может быть из будущего!", fieldName));
             }
-            if(yearOfBirth < 0){
+            if (yearOfBirth < 0) {
                 throw new InvalidYearException(String.format("Ошибка: %s не может быть отрицательным!", fieldName));
             }
+            if (CURRENT_YEAR - yearOfBirth >= 100) {
+                throw new InvalidAgeException((String.format("Ошибка: невозможный %s", fieldName)));
+            }
             return yearOfBirth;
-        } catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             throw new NumberFormatException(String.format("Ошибка: %s должен состоять только из цифр!!", fieldName));
         }
     }
 
 
-    private static void print(String str){
+    private static void print(String str) {
         System.out.print(str);
     }
 }

@@ -87,7 +87,7 @@ public class InputHandler {
             System.out.print(prompt);
             OptionalDouble value = tryParse(sc.nextLine().strip());
             return validateParameters(value);
-        } catch (NegativeValueException | IllegalArgumentException e) {
+        } catch (NegativeValueException | IllegalArgumentException | ParseException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
             return getParameter(prompt);
